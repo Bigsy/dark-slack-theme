@@ -11,21 +11,22 @@ myPort.onMessage.addListener(function(data) {
 		}
 	} else {
 		if (active) {
-			head.removeChild(link);
+			document.documentElement.removeChild(link);
 			active = false;
 		}
 	}
 });
 
 function activate() {
-	head = document.getElementsByTagName('head')[0];
+        var path = chrome.extension.getURL('darks.css');
+	//head = document.getElementsByTagName('head')[0];
 	link = document.createElement('link');
 	link.id = "darkstyle_css";
 	link.rel = 'stylesheet';
 	link.type = 'text/css';
-	link.href = chrome.extension.getURL('darks.css');
+	link.href = path;
 	link.media = 'all';
-	head.appendChild(link);
+	document.documentElement.appendChild(link);
 	active = true;
 }
 
