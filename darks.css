@@ -1278,6 +1278,5 @@ body { background: #2f343f; color: #e6e6e6; }
   #channel_specific_settings .extra_left_border { border-left: 3px solid #404552; }
   #channel_specific_settings .extra_right_border { border-right: 3px solid #404552; }
   #channel_specific_settings .revert_to_default { color: #949494; }
-  #channel_specific_settings .revert_to_default:hover { color: #bf360c; } }
-Status API Training Shop Blog About Pricing
-© 2015 GitHub, Inc. Terms Privacy Security Contact Help
+  #channel_specific_settings .revert_to_default:hover { color: #bf360c; }
+  #msgs_div .unread_divider.adjacent_to_date { color: #404552; }
