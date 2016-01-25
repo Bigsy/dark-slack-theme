@@ -1,7 +1,7 @@
 ﻿
 {
   "name": "Dark theme for Slack",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Dark theme for Slack",
   "manifest_version": 2,
   "permissions": [
