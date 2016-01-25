@@ -1279,4 +1279,7 @@ body { background: #2f343f; color: #e6e6e6; }
   #channel_specific_settings .extra_right_border { border-right: 3px solid #404552; }
   #channel_specific_settings .revert_to_default { color: #949494; }
   #channel_specific_settings .revert_to_default:hover { color: #bf360c; }
-  #msgs_div .unread_divider.adjacent_to_date { color: #404552; }
+  #msgs_div .unread_divider.adjacent_to_date { background-color: #2f343f; }
+  #fs_modal h1, #fs_modal h2, #fs_modal h3, #fs_modal h4, #fs_modal h5 { color: #e6e6e6; }
+  #fs_modal #fs_modal_sidebar a  { color: #e6e6e6; }
+  #fs_modal.prefs_modal .prefs_rollup:hover:not(.active) { background-color: #3aa3e3; }
