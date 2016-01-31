@@ -1287,3 +1287,4 @@ a.two_factor_choice:hover .two_factor_link, a.two_factor_choice:link:hover .two_
 .fs_modal_file_viewer_content .viewer { background-color: #2f343f; }
 .channel_header_button#details_toggle.active { background-color: #404552; }
 .channel_header_button#details_toggle.active:hover { background-color: #3aa3e3; }
+.fs_modal_file_viewer_content .comment_panel { background-color: #404552; }
