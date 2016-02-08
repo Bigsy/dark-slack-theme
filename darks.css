@@ -1288,3 +1288,5 @@ a.two_factor_choice:hover .two_factor_link, a.two_factor_choice:link:hover .two_
 .channel_header_button#details_toggle.active { background-color: #404552; }
 .channel_header_button#details_toggle.active:hover { background-color: #3aa3e3; }
 .fs_modal_file_viewer_content .comment_panel { background-color: #404552; }
+ts-jumper ts-jumper-container { background: #2f343f; }
+ts-jumper input[type=text], ts-jumper input[type=text]:focus { color: #e6e6e6; }
