@@ -1296,3 +1296,6 @@ ts-jumper input[type=text], ts-jumper input[type=text]:focus { color: #e6e6e6; }
 #client_header .channel_header .flex_header { background: #2f343f; }
 #client_header .channel_header .channel_name_container .channel_name { color: #9e9ea6; }
 #client_header .channel_header .channel_header_icon { color: #9e9ea6; }
+#loading_message p { color: #9e9ea6; }
+#loading_message_spinner { background: #2f343f; }
+#loading_welcome { background: #2f343f; }
