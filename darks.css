@@ -1303,5 +1303,6 @@ span.member_real_name { color: #9e9ea6; }
 ts-jumper ol li .channel_name, ts-jumper ol li .channel_not_member, ts-jumper ol li .member_real_name, ts-jumper ol li .member_username, ts-jumper ol li .searching, ts-jumper ol li .team_username { color: #9e9ea6; }
 #client_header .channel_header .channel_header_icon#details_toggle.active, #client_header .channel_header .channel_header_icon#recent_mentions_toggle.active, #client_header .channel_header .channel_header_icon#stars_toggle.active { background: #5294e2;}
 #client_header .channel_header .channel_header_icon#details_toggle.active:hover, #client_header .channel_header .channel_header_icon#recent_mentions_toggle.active:hover, #client_header .channel_header .channel_header_icon#stars_toggle.active:hover { background: #5294e2;}
-#client_header .channel_header .channel_title_info .channel_details_toggle { color: #2c2d30; }
-#client_header .channel_header .channel_header_icon { color: #2c2d30; }
+#client_header .channel_header .channel_title_info .channel_details_toggle { color: #9e9ea6; }
+#client_header .channel_header .channel_header_icon { color: #9e9ea6; }
+#client_header .channel_header .channel_title_info .channel_actions_toggle { color: #9e9ea6; }
