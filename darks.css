@@ -1306,3 +1306,4 @@ ts-jumper ol li .channel_name, ts-jumper ol li .channel_not_member, ts-jumper ol
 #client_header .channel_header .channel_title_info .channel_details_toggle { color: #9e9ea6; }
 #client_header .channel_header .channel_header_icon { color: #9e9ea6; }
 #client_header .channel_header .channel_title_info .channel_actions_toggle { color: #9e9ea6; }
+#client_body:not(.onboarding):before { background: #2f343f; }
