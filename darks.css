@@ -167,7 +167,7 @@ input[disabled], input[readonly], textarea[disabled], textarea[readonly] { backg
 #message_edit_form.offline #primary_file_button, #messages-input-container.offline #primary_file_button { border-color: #404552; color: #949494; }
 #primary_file_button { background: padding-box #404552; border: 2px solid #404552; }
 #primary_file_button.active, #primary_file_button:hover { background: #404552; border-color: #404552; color: #e6e6e6; }
-#footer { background: #2f343f; }
+#footer:not(.footer_msg_input) { background: #2f343f; }
 #footer.disabled #message-input { background: padding-box #404552 !important; border: 2px solid #404552 !important; }
 #footer_archives_table { color: #949494; }
 #typing_text { color: #949494; }
