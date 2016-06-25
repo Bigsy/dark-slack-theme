@@ -1307,3 +1307,10 @@ ts-jumper ol li .channel_name, ts-jumper ol li .channel_not_member, ts-jumper ol
 #client_header .channel_header .channel_header_icon { color: #9e9ea6; }
 #client_header .channel_header .channel_title_info .channel_actions_toggle { color: #9e9ea6; }
 #client_body:not(.onboarding):before { background: #2f343f; }
+#autocomplete_menu.search_menu .result_item_btn {color: #a0a0a2; }
+body:not(.loading) #team_menu.active, body:not(.loading) #team_menu:hover { background: #2f343f; }
+.supports_custom_scrollbar .team_menu.slack_menu .menu_content { background: #2f343f; }
+.supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-thumb { background: #404552; }
+.supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-track { background: #2f343f; }
+.supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-corner, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-corner  { background: #2f343f; }
+.supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-track { background: #2f343f; }
