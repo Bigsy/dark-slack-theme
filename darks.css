@@ -1314,3 +1314,15 @@ body:not(.loading) #team_menu.active, body:not(.loading) #team_menu:hover { back
 .supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-track { background: #2f343f; }
 .supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-corner, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-corner  { background: #2f343f; }
 .supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-track { background: #2f343f; }
+#flex_contents .toolbar_container { background: #2f343f; }
+.file_container .CodeMirror .CodeMirror-code>div pre, .file_container .CodeMirror .sssh-line pre, .file_container .sssh-code .CodeMirror-code>div pre, .file_container .sssh-code .sssh-line pre { color: #9e9ea6; }
+.modal-footer { background: #2f343f; }
+.modal-header { background: #2f343f; }
+#channels_nav ul li.unread_link.active a, #channels_scroller.show_which_channel_is_active ul li.active a.channel_name, #channels_scroller.show_which_channel_is_active ul li.active a.group_name, #channels_scroller.show_which_channel_is_active ul li.active a.im_name, #channels_scroller.show_which_channel_is_active ul li.active a.mpim_name { background: #5294e2;}
+.supports_custom_scrollbar #emoji_menu #emoji_menu_items_scroller { background: #404552; }
+#emoji_menu #emoji_menu_header { background: #2f343f; }
+#emoji_menu h3 { background: #2f343f; }
+.supports_custom_scrollbar .feature_indigenous_scroll #messages_container:after { background: #2f343f; }
+#client_body:not(.onboarding):before { border-bottom: 3px solid #404552 }
+#client_header .channel_header .channel_title_info .divider_bar { background: #404552; }
+.supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-track { color: #2f343f; }
