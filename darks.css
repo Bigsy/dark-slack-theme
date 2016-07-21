@@ -1326,3 +1326,9 @@ body:not(.loading) #team_menu.active, body:not(.loading) #team_menu:hover { back
 #client_body:not(.onboarding):before { border-bottom: 3px solid #404552 }
 #client_header .channel_header .channel_title_info .divider_bar { background: #404552; }
 .supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar .feature_indigenous_scroll #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar .feature_indigenous_scroll #msgs_scroller_div::-webkit-scrollbar-track { color: #2f343f; }
+.supports_custom_scrollbar #flex_contents .subheading { background: #404552; }
+.mention_day_container_div .day_divider:before { background: #404552; }
+#flex_contents .subheading {color: #a0a0a2; }
+#autocomplete_menu.search_menu .query_header { background-color: #404552; }
+#autocomplete_menu.search_menu .query_header .search_query_preview {color: #a0a0a2; }
+#autocomplete_menu footer, #autocomplete_menu header { background-color: #404552; }
