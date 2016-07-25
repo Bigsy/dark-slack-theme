@@ -1332,3 +1332,4 @@ body:not(.loading) #team_menu.active, body:not(.loading) #team_menu:hover { back
 #autocomplete_menu.search_menu .query_header { background-color: #404552; }
 #autocomplete_menu.search_menu .query_header .search_query_preview {color: #a0a0a2; }
 #autocomplete_menu footer, #autocomplete_menu header { background-color: #404552; }
+#messages_container.has_top_messages_banner:before { background: #2f343f; }
