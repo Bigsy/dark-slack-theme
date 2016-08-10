@@ -1337,3 +1337,8 @@ body:not(.loading) #team_menu.active, body:not(.loading) #team_menu:hover { back
 .supports_custom_scrollbar .flex_content_scroller::-webkit-scrollbar-thumb, .supports_custom_scrollbar .flex_content_scroller::-webkit-scrollbar-track { color: #2f343f; }
 .supports_custom_scrollbar .flex_content_scroller::-webkit-scrollbar-thumb { background: #2f343f; }
 .supports_custom_scrollbar .flex_content_scroller::-webkit-scrollbar-track { background: #404552; }
+
+.supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-track { background: #404552; }
+.supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-thumb { background: #2f343f; }
+.supports_custom_scrollbar #messages_container:after { background: #2f343f; }
+.supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-track { color: #404552; }
