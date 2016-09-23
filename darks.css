@@ -1342,3 +1342,7 @@ body:not(.loading) #team_menu.active, body:not(.loading) #team_menu:hover { back
 .supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-thumb { background: #2f343f; }
 .supports_custom_scrollbar #messages_container:after { background: #2f343f; }
 .supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar #archive_msgs_scroller_div::-webkit-scrollbar-track, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar #msgs_scroller_div::-webkit-scrollbar-track { color: #404552; }
+#client_header .channel_header:not(.channel_header_refactor) #channel_header_info { background: #2f343f; }
+body.feature_channel_name_menu #client_header .channel_header .channel_name_container .channel_name { color: #9e9ea6; }
+#client_header .channel_header:not(.channel_header_refactor) .flex_header { background: #2f343f; }
+#client_header .channel_header:not(.channel_header_refactor) .channel_title_info { background: #2f343f; }
