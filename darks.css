@@ -1349,3 +1349,4 @@ body.feature_channel_name_menu #client_header .channel_header .channel_name_cont
 #col_flex { background: #2f343f; }
 #client_header .channel_header:not(.channel_header_refactor) .channel_header_icon#details_toggle.active, #client_header .channel_header:not(.channel_header_refactor) .channel_header_icon#recent_mentions_toggle.active, #client_header .channel_header:not(.channel_header_refactor) .channel_header_icon#stars_toggle.active { background: #404552; }
 #client_header .channel_header:not(.channel_header_refactor) .channel_header_icon#details_toggle.active:hover, #client_header .channel_header:not(.channel_header_refactor) .channel_header_icon#recent_mentions_toggle.active:hover, #client_header .channel_header:not(.channel_header_refactor) .channel_header_icon#stars_toggle.active:hover { background: #404552; }
+.channel_header_refactor.channel_header { background: #2f343f; }
