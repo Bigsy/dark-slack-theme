@@ -5771,3 +5771,7 @@ background:#2f343f
 .unread_group_header{
     background:#404552
 }
+
+ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.new_reply), ts-message:hover:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.new_reply){
+    background:#404552
+}
