@@ -5775,3 +5775,25 @@ background:#2f343f
 ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.new_reply), ts-message:hover:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.new_reply){
     background:#404552
 }
+
+#footer.footer_msg_input {
+    background-image:linear-gradient(to bottom,rgba(255,255,255,0),#2f343f 6px)
+}
+
+#msg_input{
+    border:2px solid #2c2d30
+}
+
+#msg_input{
+    background:#404552
+}
+
+#msg_input:focus {
+    border-color: #2c2d30;
+    outline: 0;
+    box-shadow: none;
+}
+
+#msg_input:focus+#primary_file_button:not(:hover):not(.active) {
+    border-color: #2c2d30;
+}
