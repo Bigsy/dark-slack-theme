@@ -5785,7 +5785,8 @@ ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.
 }
 
 #msg_input{
-    background:#404552
+    background:#404552;
+    color:#e6e6e6
 }
 
 #msg_input:focus {
@@ -5796,4 +5797,12 @@ ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.
 
 #msg_input:focus+#primary_file_button:not(:hover):not(.active) {
     border-color: #2c2d30;
+}
+
+#client-ui:not(.flexpane_redesign) #details_tab .heading {
+    background:#2f343f;
+}
+
+#client-ui:not(.flexpane_redesign) #flex_contents .heading {
+    color:#9e9ea6
 }
