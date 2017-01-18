@@ -5806,3 +5806,15 @@ ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.
 #client-ui:not(.flexpane_redesign) #flex_contents .heading {
     color:#9e9ea6
 }
+
+ts-message.selected:not(.delete_mode){
+    background: #2f343f;
+}
+
+#convo_tab .message_input, #convo_tab textarea#msg_text{
+    color:#e6e6e6
+}
+
+.flexpane_redesign #flex_contents .heading_text{
+    color: #9e9ea6;
+}
