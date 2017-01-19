@@ -5818,3 +5818,7 @@ ts-message.selected:not(.delete_mode){
 .flexpane_redesign #flex_contents .heading_text{
     color: #9e9ea6;
 }
+
+#threads_msgs_scroller_div{
+    background: #2f343f;
+}
