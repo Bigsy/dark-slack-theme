@@ -5822,3 +5822,7 @@ ts-message.selected:not(.delete_mode){
 #threads_msgs_scroller_div{
     background: #2f343f;
 }
+
+.attachment_group.has_container{
+    background: #2f343f;
+}
