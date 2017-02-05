@@ -5826,3 +5826,15 @@ ts-message.selected:not(.delete_mode){
 .attachment_group.has_container{
     background: #2f343f;
 }
+
+ts-thread {
+    background: #2f343f;
+}
+
+ts-thread .thread_messages{
+    background: #2f343f;
+}
+
+ts-thread .thread_header .thread_channel_name a {
+    color: #9e9ea6;
+}
