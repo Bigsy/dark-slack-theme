@@ -5842,3 +5842,11 @@ ts-thread .thread_header .thread_channel_name a {
 nav.p-channel_sidebar {
     background: #404552;
 }
+
+.reply_input_container .ql-container {
+    background-color: #404552;
+}
+
+.inline_message_input_container .message_input{
+    color: #9e9ea6;
+}
