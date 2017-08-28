@@ -5847,6 +5847,52 @@ nav.p-channel_sidebar {
     background-color: #404552;
 }
 
-.inline_message_input_container .message_input{
+.inline_message_input_container .message_input {
     color: #9e9ea6;
 }
+
+#threads_msgs_scroller_div .threads_caught_up_divider .divider_line {
+    border-top: #404552;
+}
+
+#threads_msgs_scroller_div:not(.loading):before {
+    background: #2f343f;
+}
+
+.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-thumb {
+    background-color: #404552;
+}
+
+.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track {
+    color: #404552;
+}
+
+.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track {
+    background: #2f343f;
+}
+
+#threads_msgs_scroller_div .threads_caught_up_divider .divider_label {
+    background: #2f343f;
+}
+
+.client_channels_list_container {
+    border-right: #404552;
+}
+
+.p-channel_sidebar .c-custom_scrollbar__thumb_vertical, .p-channel_sidebar .c-scrollbar__bar {
+    background: #2c2d30;
+}
+
+.reply_input_container .ql-container{
+    border: 1px solid #2c2d30;
+}
+
+ts-thread .thread_messages {
+    border: 1px solid #2c2d30;
+}
+
+ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_container:hover {
+    background-color: #404552;
+}
+
+
