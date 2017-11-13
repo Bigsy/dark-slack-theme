@@ -5851,7 +5851,10 @@ nav.p-channel_sidebar {
 #archives_end_div_msg_lim h2, #end_display_msg_lim h2,
 #archives_end_div_msg_lim h1, #end_display_msg_lim h1,
 .ql-container.texty_single_line_input,
-#flex_contents .heading_text {
+#flex_contents .heading_text,
+#details_tab .channel_page_section .section_title,
+.c-member__display-name, .c-team__display-name, .c-usergroup__handle,
+#details_tab .feature_sli_channel_insights .channel_created_section .creator_link, #details_tab .feature_sli_channel_insights .channel_purpose_section .channel_purpose_text {
     color: #9e9ea6;
 }
 
@@ -5871,7 +5874,8 @@ nav.p-channel_sidebar {
     color: #404552;
 }
 
-.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track {
+.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track,
+#edit_topic_inner:before {
     background: #2f343f;
 }
 
@@ -5895,7 +5899,8 @@ ts-thread .thread_messages {
     border: 1px solid #2c2d30;
 }
 
-ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_container:hover {
+ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_container:hover,
+.c-channel_insights__message ts-message.standalone:not(.for_mention_display):not(.for_search_display):not(.for_top_results_search_display):not(.for_star_display) {
     background-color: #404552;
 }
 
