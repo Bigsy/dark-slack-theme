@@ -5839,7 +5839,8 @@ ts-thread .thread_header .thread_channel_name a {
     color: #9e9ea6;
 }
 
-nav.p-channel_sidebar {
+nav.p-channel_sidebar,
+.app_preview_link_slug, .internal_member_link, .internal_user_group_link, ts-mention {
     background: #404552;
 }
 
