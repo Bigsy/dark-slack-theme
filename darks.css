@@ -5880,7 +5880,8 @@ nav.p-channel_sidebar,
     background: #2f343f;
 }
 
-#threads_msgs_scroller_div .threads_caught_up_divider .divider_label {
+#threads_msgs_scroller_div .threads_caught_up_divider .divider_label,
+#edit_topic_inner::before {
     background: #2f343f;
 }
 
