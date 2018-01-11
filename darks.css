@@ -4266,7 +4266,10 @@ div#emoji_tip i, div#emoji_zero_results i {
     color: #e6e6e6
 }
 
-.menu_member_header .member_details.feature_custom_fields .member_name_and_presence .presence.away {
+.menu_member_header .member_details.feature_custom_fields .member_name_and_presence .presence.away,
+.c-message__body,
+.c-message_attachment
+{
     color: #fff
 }
 
@@ -5855,7 +5858,9 @@ nav.p-channel_sidebar,
 #flex_contents .heading_text,
 #details_tab .channel_page_section .section_title,
 .c-member__display-name, .c-team__display-name, .c-usergroup__handle,
-#details_tab .feature_sli_channel_insights .channel_created_section .creator_link, #details_tab .feature_sli_channel_insights .channel_purpose_section .channel_purpose_text {
+#details_tab .feature_sli_channel_insights .channel_created_section .creator_link, #details_tab .feature_sli_channel_insights .channel_purpose_section .channel_purpose_text,
+.c-message--light .c-message__sender .c-message__sender_link,
+.c-message_list__day_divider__label {
     color: #9e9ea6;
 }
 
@@ -5890,7 +5895,8 @@ nav.p-channel_sidebar,
 }
 
 .p-channel_sidebar .c-custom_scrollbar__thumb_vertical, .p-channel_sidebar .c-scrollbar__bar,
-.app_preview_link_slug.mention, .internal_member_link.mention, .internal_user_group_link.mention, ts-mention.mention {
+.app_preview_link_slug.mention, .internal_member_link.mention, .internal_user_group_link.mention, ts-mention.mention,
+.p-channel_sidebar__jumper {
     background: #2c2d30;
 }
 
@@ -5903,7 +5909,11 @@ ts-thread .thread_messages {
 }
 
 ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_container:hover,
-.c-channel_insights__message ts-message.standalone:not(.for_mention_display):not(.for_search_display):not(.for_top_results_search_display):not(.for_star_display) {
+.c-channel_insights__message ts-message.standalone:not(.for_mention_display):not(.for_search_display):not(.for_top_results_search_display):not(.for_star_display),
+.c-message_list__day_divider__label__pill,
+.p-message_pane .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before,
+.c-message:hover:not(.c-message--highlight):not(.c-message--standalone):not(.c-message--pinned):not(.c-message--ephemeral):not(.c-message--custom_response):not(.c-message--starred):not(.c-message--sli_highlight), .c-message--hover:not(.c-message--highlight):not(.c-message--standalone):not(.c-message--pinned):not(.c-message--ephemeral):not(.c-message--custom_response):not(.c-message--starred):not(.c-message--sli_highlight), .c-message--focus:not(.c-message--highlight):not(.c-message--standalone):not(.c-message--pinned):not(.c-message--ephemeral):not(.c-message--custom_response):not(.c-message--starred):not(.c-message--sli_highlight)
+{
     background-color: #404552;
 }
 
@@ -5930,4 +5940,8 @@ ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_c
 
 .end_div_msg_lim {
     background-image: url();
+}
+
+.p-message_pane .p-message_pane__top_banners:not(:empty) + div .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .p-message_pane__top_banners:not(:empty) + div .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before {
+    box-shadow: #2f343f;
 }
