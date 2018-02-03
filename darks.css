@@ -5860,12 +5860,23 @@ nav.p-channel_sidebar,
 .c-member__display-name, .c-team__display-name, .c-usergroup__handle,
 #details_tab .feature_sli_channel_insights .channel_created_section .creator_link, #details_tab .feature_sli_channel_insights .channel_purpose_section .channel_purpose_text,
 .c-message--light .c-message__sender .c-message__sender_link,
-.c-message_list__day_divider__label {
+.c-message_list__day_divider__label,
+.c-email__header_name,
+.c-email__title_collapsed,
+.c-email__sender_collapsed,
+.c-message--light .c-message__sender .c-message__sender_link
+{
     color: #9e9ea6;
 }
 
-#threads_msgs_scroller_div .threads_caught_up_divider .divider_line {
+#threads_msgs_scroller_div .threads_caught_up_divider .divider_line,
+.c-message_list__day_divider__line {
     border-top: #404552;
+}
+
+.p-message_pane .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before
+{
+    border-bottom: #2f343f;
 }
 
 #threads_msgs_scroller_div:not(.loading):before {
@@ -5876,17 +5887,20 @@ nav.p-channel_sidebar,
     background-color: #404552;
 }
 
-.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track {
+.supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-thumb, .supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track
+{
     color: #404552;
 }
 
 .supports_custom_scrollbar:not(.slim_scrollbar) #threads_msgs_scroller_div::-webkit-scrollbar-track,
-#edit_topic_inner:before {
+#edit_topic_inner:before,
+#edit_topic_inner:not(.unable_to_post):before {
     background: #2f343f;
 }
 
 #threads_msgs_scroller_div .threads_caught_up_divider .divider_label,
-#edit_topic_inner::before {
+#edit_topic_inner::before,
+.c-file_container {
     background: #2f343f;
 }
 
@@ -5896,7 +5910,11 @@ nav.p-channel_sidebar,
 
 .p-channel_sidebar .c-custom_scrollbar__thumb_vertical, .p-channel_sidebar .c-scrollbar__bar,
 .app_preview_link_slug.mention, .internal_member_link.mention, .internal_user_group_link.mention, ts-mention.mention,
-.p-channel_sidebar__jumper {
+.p-channel_sidebar__jumper,
+.c-mrkdwn__member--link, .c-mrkdwn__subteam--link,
+.c-mrkdwn__mention, .c-mrkdwn__mention:hover, .c-mrkdwn__member--mention, .c-mrkdwn__member--mention:hover, .c-mrkdwn__broadcast--mention, .c-mrkdwn__broadcast--mention:hover, .c-mrkdwn__subteam--mention, .c-mrkdwn__subteam--mention:hover,
+.c-message__bot_label
+{
     background: #2c2d30;
 }
 
@@ -5944,4 +5962,12 @@ ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_c
 
 .p-message_pane .p-message_pane__top_banners:not(:empty) + div .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .p-message_pane__top_banners:not(:empty) + div .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before {
     box-shadow: #2f343f;
+}
+
+#col_messages,
+#footer,
+.channel_header,
+#client_body:not(.onboarding):before
+{
+    box-shadow: 0 1px 0 #2f343f inset
 }
