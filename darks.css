@@ -5783,7 +5783,10 @@ ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.
     background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), #2f343f 6px)
 }
 
-#msg_input {
+#msg_input,
+.feature_sli_file_search #search_results.all .top_search_results .search_message_result, .feature_sli_file_search #search_results.messages .top_search_results .search_message_result,
+.feature_sli_file_search #search_results.all .search_message_result, .feature_sli_file_search #search_results.messages .search_message_result
+{
     border: 2px solid #2c2d30
 }
 
@@ -5798,7 +5801,9 @@ ts-message.active:not(.standalone):not(.multi_delete_mode):not(.highlight):not(.
     box-shadow: none;
 }
 
-#msg_input:focus + #primary_file_button:not(:hover):not(.active) {
+#msg_input:focus + #primary_file_button:not(:hover):not(.active),
+.c-enhanced_text_input
+{
     border-color: #2c2d30;
 }
 
@@ -5843,7 +5848,9 @@ ts-thread .thread_header .thread_channel_name a {
 }
 
 nav.p-channel_sidebar,
-.app_preview_link_slug, .internal_member_link, .internal_user_group_link, ts-mention {
+.app_preview_link_slug, .internal_member_link, .internal_user_group_link, ts-mention,
+.supports_custom_scrollbar:not(.slim_scrollbar) .flex_content_scroller::-webkit-scrollbar-track
+{
     background: #404552;
 }
 
@@ -5864,9 +5871,26 @@ nav.p-channel_sidebar,
 .c-email__header_name,
 .c-email__title_collapsed,
 .c-email__sender_collapsed,
-.c-message--light .c-message__sender .c-message__sender_link
+.c-message--light .c-message__sender .c-message__sender_link,
+#autocomplete_menu.search_menu .results.unified .unified_autocomplete_item .text,
+.sli_expert_search,
+.sli_expert_search_cta__text,
+.feature_sli_file_search #search_results.all .sli_expert_search .channel_link, .feature_sli_file_search #search_results.messages .sli_expert_search .channel_link,
+.p-message_pane__foreword__description, .p-message_pane__limited_history_alert,
+.p-apps_browser__app_info,
+.c-member__display-name--large, .c-member__title--large,
+.unread_empty_state,
+#im_browser .im_browser_row.multiparty,
+.c-member__secondary-name--medium,
+.sk_black
 {
     color: #9e9ea6;
+}
+
+.sli_expert_search__result .app_preview_link, .sli_expert_search__result .member_preview_link
+{
+    color: #9e9ea6!important;
+
 }
 
 #threads_msgs_scroller_div .threads_caught_up_divider .divider_line,
@@ -5874,12 +5898,16 @@ nav.p-channel_sidebar,
     border-top: #404552;
 }
 
-.p-message_pane .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before
+.p-message_pane .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before,
 {
     border-bottom: #2f343f;
 }
 
-#threads_msgs_scroller_div:not(.loading):before {
+#threads_msgs_scroller_div:not(.loading):before,
+.p-apps_browser__category_header,
+#threads_msgs_scroller_div.loading,
+.texty_legacy.texty_single_line_input
+{
     background: #2f343f;
 }
 
@@ -5900,6 +5928,7 @@ nav.p-channel_sidebar,
 
 #threads_msgs_scroller_div .threads_caught_up_divider .divider_label,
 #edit_topic_inner::before,
+.p-apps_browser__apps_list::-webkit-scrollbar-track,
 .c-file_container {
     background: #2f343f;
 }
@@ -5910,12 +5939,23 @@ nav.p-channel_sidebar,
 
 .p-channel_sidebar .c-custom_scrollbar__thumb_vertical, .p-channel_sidebar .c-scrollbar__bar,
 .app_preview_link_slug.mention, .internal_member_link.mention, .internal_user_group_link.mention, ts-mention.mention,
-.p-channel_sidebar__jumper,
 .c-mrkdwn__member--link, .c-mrkdwn__subteam--link,
 .c-mrkdwn__mention, .c-mrkdwn__mention:hover, .c-mrkdwn__member--mention, .c-mrkdwn__member--mention:hover, .c-mrkdwn__broadcast--mention, .c-mrkdwn__broadcast--mention:hover, .c-mrkdwn__subteam--mention, .c-mrkdwn__subteam--mention:hover,
-.c-message__bot_label
+.c-message__bot_label,
+.supports_custom_scrollbar:not(.slim_scrollbar) .flex_content_scroller::-webkit-scrollbar-thumb,
+#convo_container .convo_flexpane_divider .reply_count, #file_preview_scroller .convo_flexpane_divider .reply_count,
+.p-apps_browser__apps_list::-webkit-scrollbar-thumb,
+.p-degraded_list__loading,
+.c-scrollbar__bar,
+#channel_browser #channel_list_container:not(.keyboard_active).not_scrolling .channel_browser_row:hover, #channel_browser .channel_browser_row.highlighted
+
 {
     background: #2c2d30;
+}
+
+.supports_custom_scrollbar:not(.slim_scrollbar) .flex_content_scroller::-webkit-scrollbar-thumb, .supports_custom_scrollbar:not(.slim_scrollbar) .flex_content_scroller::-webkit-scrollbar-track
+{
+    color: #2c2d30;
 }
 
 .reply_input_container .ql-container{
@@ -5935,7 +5975,14 @@ ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_c
     background-color: #404552;
 }
 
-.end_div_msg_lim  {
+.end_div_msg_lim,
+#autocomplete_menu.search_menu.unified .query_header, #chat_input_tab_ui.search_menu.unified .query_header,
+#autocomplete_menu.search_menu footer.unified,
+.feature_sli_file_search #search_results .file_list_item,
+.sli_expert_search,
+.c-enhanced_text_input,
+.slack_menu_download
+{
     background-color: #2f343f;
 }
 
@@ -5971,3 +6018,15 @@ ts-thread .collapse_inline_thread_container:hover, ts-thread .view_all_replies_c
 {
     box-shadow: 0 1px 0 #2f343f inset
 }
+
+.feature_sli_file_search #search_results.all .search_result_with_extract.first_extract_message_in_group, .feature_sli_file_search #search_results.all .search_result_with_extract.first_extract_message_in_group:hover, .feature_sli_file_search #search_results.all .search_result_with_extract:first-child, .feature_sli_file_search #search_results.all .search_result_with_extract:first-child:hover, .feature_sli_file_search #search_results.messages .search_result_with_extract.first_extract_message_in_group, .feature_sli_file_search #search_results.messages .search_result_with_extract.first_extract_message_in_group:hover, .feature_sli_file_search #search_results.messages .search_result_with_extract:first-child, .feature_sli_file_search #search_results.messages .search_result_with_extract:first-child:hover
+.p-message_pane .c-message_list:not(.c-virtual_list--scrollbar):before, .p-message_pane .c-message_list.c-virtual_list--scrollbar > .c-scrollbar__hider:before,
+#client-ui .file_list_item.file_list_item--redesign,
+#convo_container .convo_flexpane_divider, #file_preview_scroller .convo_flexpane_divider
+{
+    border-top: 1px solid #2c2d30;
+    border-bottom: 1px solid #2c2d30;
+}
+
+
+
