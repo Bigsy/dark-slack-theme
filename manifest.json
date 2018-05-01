@@ -1,10 +1,13 @@
 ﻿
 {
   "name": "Dark theme for Slack",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "description": "Dark theme for Slack",
   "manifest_version": 2,
   "permissions": [
+    "storage",
+    "tabs",
+    "theme",
     "http://www.slack.com/"
   ],
   "content_scripts": [{
