@@ -1,7 +1,7 @@
 ﻿
 {
   "name": "Dark theme for Slack",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "description": "Dark theme for Slack",
   "manifest_version": 2,
   "permissions": [
@@ -13,7 +13,7 @@
   "content_scripts": [{
     "matches": ["http://*.slack.com/*", "https://*.slack.com/*"],
     "js": ["slackd.js"],
-    "run_at": "document_start"
+    "run_at": "document_end"
   }],
   "background": {
     "page": "background.html",

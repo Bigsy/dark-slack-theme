@@ -1,5 +1,5 @@
 var myPort = chrome.runtime.connect({
-    name: "main"
+    name: "tab"
 });
 
 var active = false;
@@ -7,6 +7,7 @@ var active = false;
 myPort.onMessage.addListener(function (data) {
     if (data == "true") {
         if (!active) {
+            removeStyle();
             activate();
         }
     } else {
