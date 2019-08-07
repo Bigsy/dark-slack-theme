@@ -22,9 +22,9 @@ function activate() {
     createOrUpdateDynamicTheme({
         "mode": 1,
         "brightness": 100,
-        "contrast": 100,
-        "grayscale": 0,
-        "sepia": 0,
+        "contrast": 90,
+        "grayscale": 20,
+        "sepia": 10,
         "useFont": false,
         "fontFamily": "Open Sans",
         "textStroke": 0
@@ -76,6 +76,15 @@ function removeSVGFilter() {
     removeNode(document.getElementById('dark-slack-svg'));
 }
 
+function getMatches(regex, input, group = 0) {
+    const matches = [];
+    let m;
+    while (m = regex.exec(input)) {
+        matches.push(m[group]);
+    }
+    return matches;
+}
+
 function parseURL(url) {
     const a = document.createElement('a');
     a.href = url;
@@ -93,16 +102,13 @@ function getAbsoluteURL($base, $relative) {
         const u = parseURL(`${b.protocol}//${b.host}${$relative}`);
         return u.href;
     }
-    const pathParts = b.pathname.split('/').concat($relative.split('/')).filter((p) => p);
-    let backwardIndex;
-    while ((backwardIndex = pathParts.indexOf('..')) > 0) {
-        pathParts.splice(backwardIndex - 1, 2);
-    }
-    const u = parseURL(`${b.protocol}//${b.host}/${pathParts.join('/')}`);
+    const baseParts = b.pathname.split('/');
+    const backwards = getMatches(/\.\.\//g, $relative);
+    const u = parseURL(`${b.protocol}//${b.host}${baseParts.slice(0, baseParts.length - backwards.length).join('/')}/${$relative.replace(/^(\.\.\/)*/, '')}`);
     return u.href;
 }
 
-const DEBUG = false;
+const DEBUG = true;
 function logInfo(...args) {
     DEBUG && console.info(...args);
 }
@@ -113,49 +119,40 @@ function logWarn(...args) {
 function iterateCSSRules(rules, iterate) {
     Array.from(rules)
         .forEach((rule) => {
-        if (rule instanceof CSSMediaRule) {
-        Array.from(rule.cssRules).forEach((mediaRule) => iterate(mediaRule));
-    }
-else if (rule instanceof CSSStyleRule) {
-        iterate(rule);
-    }
-    else if (rule instanceof CSSImportRule) {
-        try {
-            Array.from(rule.styleSheet.cssRules).forEach((importedRule) => iterate(importedRule));
-        }
-        catch (err) {
-            logWarn(err);
-        }
-    }
-    else {
-        logWarn(`CSSRule type not supported`, rule);
-    }
-});
+            if (rule instanceof CSSMediaRule) {
+                Array.from(rule.cssRules).forEach((mediaRule) => iterate(mediaRule));
+            }
+            else if (rule instanceof CSSStyleRule) {
+                iterate(rule);
+            }
+            else {
+                logWarn(`CSSRule type not supported`, rule);
+            }
+        });
 }
 function iterateCSSDeclarations(style, iterate) {
     Array.from(style).forEach((property) => {
         const value = style.getPropertyValue(property).trim();
-    if (!value) {
-        return;
-    }
-    iterate(property, value);
-});
+        if (!value) {
+            return;
+        }
+        iterate(property, value);
+    });
 }
 const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
-const cssImportRegex = /@import url\((('.+?')|(".+?")|([^\)]*?))\);?/g;
 function getCSSURLValue(cssURL) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
 }
 function getCSSBaseBath(url) {
     const cssURL = parseURL(url);
-    return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^\/]+)$/i, '$1')}`;
+    return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
 }
 function replaceCSSRelativeURLsWithAbsolute($css, cssURL) {
     const cssBasePath = getCSSBaseBath(cssURL);
     return $css.replace(cssURLRegex, (match) => {
         const pathValue = getCSSURLValue(match);
-    return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
-});
+        return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+    });
 }
 const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 function replaceCSSFontFace($css) {
@@ -166,17 +163,17 @@ function replaceCSSVariables(value, variables) {
     let missing = false;
     const result = value.replace(varRegex, (match, name, fallback) => {
         if (variables.has(name)) {
-        return variables.get(name);
-    }
-else if (fallback) {
-        return fallback;
-    }
-    else {
-        logWarn(`Variable ${name} not found`);
-        missing = true;
-    }
-    return match;
-});
+            return variables.get(name);
+        }
+        else if (fallback) {
+            return fallback;
+        }
+        else {
+            logWarn(`Variable ${name} not found`);
+            missing = true;
+        }
+        return match;
+    });
     if (missing) {
         return result;
     }
@@ -186,6 +183,7 @@ else if (fallback) {
     return result;
 }
 
+// https://en.wikipedia.org/wiki/HSL_and_HSV
 function hslToRGB({ h, s, l, a = 1 }) {
     if (s === 0) {
         const [r, b, g] = [l, l, l].map((x) => Math.round(x * 255));
@@ -202,6 +200,7 @@ function hslToRGB({ h, s, l, a = 1 }) {
                         [c, 0, x]).map((n) => Math.round((n + m) * 255));
     return { r, g, b, a };
 }
+// https://en.wikipedia.org/wiki/HSL_and_HSV
 function rgbToHSL({ r: r255, g: g255, b: b255, a = 1 }) {
     const r = r255 / 255;
     const g = g255 / 255;
@@ -249,7 +248,7 @@ function rgbToString(rgb) {
 function rgbToHexString({ r, g, b, a }) {
     return `#${(a != null && a < 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x, i) => {
         return `${x < 16 ? '0' : ''}${x.toString(16)}`;
-        }).join('')}`;
+    }).join('')}`;
 }
 const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
@@ -281,18 +280,18 @@ function getNumbersFromString(str, splitter, range, units) {
     const unitsList = Object.entries(units);
     const numbers = raw.map((r) => r.trim()).map((r, i) => {
         let n;
-    const unit = unitsList.find(([u]) => r.endsWith(u));
-    if (unit) {
-        n = parseFloat(r.substring(0, r.length - unit[0].length)) / unit[1] * range[i];
-    }
-    else {
-        n = parseFloat(r);
-    }
-    if (range[i] > 1) {
-        return Math.round(n);
-    }
-    return n;
-});
+        const unit = unitsList.find(([u]) => r.endsWith(u));
+        if (unit) {
+            n = parseFloat(r.substring(0, r.length - unit[0].length)) / unit[1] * range[i];
+        }
+        else {
+            n = parseFloat(r);
+        }
+        if (range[i] > 1) {
+            return Math.round(n);
+        }
+        return n;
+    });
     return numbers;
 }
 const rgbSplitter = /rgba?|\(|\)|\/|,|\s/ig;
@@ -548,22 +547,6 @@ function multiplyMatrices(m1, m2) {
     return result;
 }
 
-function isFirefox() {
-    return navigator.userAgent.indexOf('Firefox') >= 0;
-}
-function isMacOS() {
-    return navigator.platform.toLowerCase().indexOf('mac') === 0;
-}
-
-function getMatches(regex, input, group = 0) {
-    const matches = [];
-    let m;
-    while (m = regex.exec(input)) {
-        matches.push(m[group]);
-    }
-    return matches;
-}
-
 function createFilterMatrix(config) {
     let m = Matrix.identity();
     if (config.sepia !== 0) {
@@ -661,8 +644,8 @@ function modifyColorWithCache(rgb, filter, modifyHSL) {
     }
     const id = Object.entries(rgb)
         .concat(Object.entries(filter).filter(([key]) => ['mode', 'brightness', 'contrast', 'grayscale', 'sepia'].indexOf(key) >= 0))
-.map(([key, value]) => `${key}:${value}`)
-.join(';');
+        .map(([key, value]) => `${key}:${value}`)
+        .join(';');
     if (fnCache.has(id)) {
         return fnCache.get(id);
     }
@@ -697,25 +680,23 @@ function modifyLightModeHSL({ h, s, l, a }) {
 }
 function modifyBgHSL({ h, s, l, a }) {
     const lMin = 0.1;
-    const lMaxS0 = 0.25;
+    const lMaxS0 = 0.2;
     const lMaxS1 = 0.4;
-    const sNeutralLimL0 = 0.24;
-    const sNeutralLimL1 = 0.12;
+    const sNeutralLim = 0.16;
     const sColored = 0.16;
-    const hColoredL0 = 235;
-    const hColoredL1 = 215;
+    const hColored = 220;
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = (l < lMax ?
         l :
-        l < 0.5 ?
-            lMax :
-            scale(l, 0.5, 1, lMax, lMin));
-    const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
+        scale(l, lMax, 1, lMax, lMin));
     let hx = h;
     let sx = s;
     if (s < sNeutralLim) {
         sx = sColored;
-        hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
+        hx = hColored;
+    }
+    else if (l > lMax) {
+        sx = s * scale(l, lMax, 1, 1, 0.5);
     }
     return { h: hx, s: sx, l: lx, a };
 }
@@ -727,25 +708,20 @@ function modifyBackgroundColor(rgb, filter) {
 }
 function modifyFgHSL({ h, s, l, a }) {
     const lMax = 0.9;
-    const lMinS0 = 0.7;
+    const lMinS0 = 0.6;
     const lMinS1 = 0.6;
-    const sNeutralLimL0 = 0.12;
-    const sNeutralLimL1 = 0.36;
-    const sColored = 0.24;
-    const hColoredL0 = 35;
-    const hColoredL1 = 45;
+    const sNeutralLim = 0.2;
+    const sColored = 0.16;
+    const hColored = 40;
     const lMin = scale(s, 0, 1, lMinS0, lMinS1);
-    const lx = (l < 0.5 ?
-        scale(l, 0, 0.5, lMax, lMin) :
-        l < lMin ?
-            lMin :
-            l);
+    const lx = (l < lMax ?
+        scale(l, 0, lMin, lMax, lMin) :
+        l);
     let hx = h;
     let sx = s;
-    const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
     if (s < sNeutralLim) {
         sx = sColored;
-        hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
+        hx = hColored;
     }
     return { h: hx, s: sx, l: lx, a };
 }
@@ -782,6 +758,7 @@ function createTextStyle(config) {
     const lines = [];
     lines.push('* {');
     if (config.useFont && config.fontFamily) {
+        // TODO: Validate...
         lines.push(`  font-family: ${config.fontFamily} !important;`);
     }
     if (config.textStroke > 0) {
@@ -833,24 +810,24 @@ const rejectors = new Map();
 function bgFetch(request) {
     return new Promise((resolve, reject) => {
         const id = ++counter;
-    resolvers.set(id, resolve);
-    rejectors.set(id, reject);
-    chrome.runtime.sendMessage({ type: 'fetch', data: request, id });
-});
+        resolvers.set(id, resolve);
+        rejectors.set(id, reject);
+        chrome.runtime.sendMessage({ type: 'fetch', data: request, id });
+    });
 }
 chrome.runtime.onMessage.addListener(({ type, data, error, id }) => {
     if (type === 'fetch-response') {
-    const resolve = resolvers.get(id);
-    const reject = rejectors.get(id);
-    resolvers.delete(id);
-    rejectors.delete(id);
-    if (error) {
-        reject && reject(error);
+        const resolve = resolvers.get(id);
+        const reject = rejectors.get(id);
+        resolvers.delete(id);
+        rejectors.delete(id);
+        if (error) {
+            reject && reject(error);
+        }
+        else {
+            resolve && resolve(data);
+        }
     }
-    else {
-        resolve && resolve(data);
-    }
-}
 });
 
 async function getImageDetails(url) {
@@ -863,7 +840,7 @@ async function getImageDetails(url) {
         width: image.naturalWidth,
         height: image.naturalHeight,
         ...info,
-};
+    };
 }
 async function getImageDataURL(url) {
     let dataURL;
@@ -871,13 +848,7 @@ async function getImageDataURL(url) {
         dataURL = url;
     }
     else {
-        let cache;
-        try {
-            cache = sessionStorage.getItem(`darkslack-cache:${url}`);
-        }
-        catch (err) {
-            logWarn(err);
-        }
+        const cache = sessionStorage.getItem(`darkslack-cache:${url}`);
         if (cache) {
             dataURL = cache;
         }
@@ -898,10 +869,10 @@ async function getImageDataURL(url) {
 async function urlToImage(url) {
     return new Promise((resolve, reject) => {
         const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(`Unable to load image ${url}`);
-    image.src = url;
-});
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(`Unable to load image ${url}`);
+        image.src = url;
+    });
 }
 function analyzeImage(image) {
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
@@ -919,7 +890,7 @@ function analyzeImage(image) {
     const d = imageData.data;
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
     const DARK_LIGHTNESS_THRESHOLD = 0.4;
-    const LIGHT_LIGHTNESS_THRESHOLD = 0.7;
+    const LIGHT_LIGHTNESS_THRESHOLD = 0.6;
     let transparentPixelsCount = 0;
     let darkPixelsCount = 0;
     let lightPixelsCount = 0;
@@ -964,26 +935,19 @@ function analyzeImage(image) {
 }
 function getFilteredImageDataURL({ dataURL, width, height }, filter) {
     const matrix = getSVGFilterMatrixValue(filter);
-    const svg = [
-        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
-        '<defs>',
-        '<filter id="darkslack-image-filter">',
-        `<feColorMatrix type="matrix" values="${matrix}" />`,
-        '</filter>',
-        '</defs>',
-        `<image width="${width}" height="${height}" filter="url(#darkslack-image-filter)" xlink:href="${dataURL}" />`,
-        '</svg>',
+    return [
+        'data:image/svg+xml;base64,',
+        btoa([
+            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
+            '<defs>',
+            '<filter id="darkslack-image-filter">',
+            `<feColorMatrix type="matrix" values="${matrix}" />`,
+            '</filter>',
+            '</defs>',
+            `<image width="${width}" height="${height}" filter="url(#darkslack-image-filter)" xlink:href="${dataURL}" />`,
+            '</svg>',
+        ].join(''))
     ].join('');
-    if (isFirefox()) {
-        return `data:image/svg+xml;base64,${btoa(svg)}`;
-    }
-    const bytes = new Uint8Array(svg.length);
-    for (let i = 0; i < svg.length; i++) {
-        bytes[i] = svg.charCodeAt(i);
-    }
-    const blob = new Blob([bytes], { type: 'image/svg+xml' });
-    const objectURL = URL.createObjectURL(blob);
-    return objectURL;
 }
 
 function getModifiableCSSDeclaration(property, value, rule, isCancelled) {
@@ -991,9 +955,7 @@ function getModifiableCSSDeclaration(property, value, rule, isCancelled) {
     if (property.startsWith('--')) {
         return null;
     }
-    else if ((property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
-        property === 'fill' ||
-        property === 'stroke') {
+    else if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return { property, value: modifier, important };
@@ -1013,20 +975,20 @@ function getModifiableCSSDeclaration(property, value, rule, isCancelled) {
     }
     return null;
 }
-function getModifiedUserAgentStyle(filter, isIFrame) {
+function getModifiedUserAgentStyle(filter) {
     const lines = [];
-    if (!isIFrame) {
+    if (filter.mode === 1) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({ r: 255, g: 255, b: 255 }, filter)} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
+    lines.push('html, body, input, textarea, select, button {');
     lines.push(`    background-color: ${modifyBackgroundColor({ r: 255, g: 255, b: 255 }, filter)};`);
     lines.push(`    border-color: ${modifyBorderColor({ r: 76, g: 76, b: 76 }, filter)};`);
     lines.push(`    color: ${modifyForegroundColor({ r: 0, g: 0, b: 0 }, filter)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyForegroundColor({ r: 0, g: 64, b: 255 }, filter)};`);
+    lines.push(`    color: ${modifyBorderColor({ r: 0, g: 64, b: 255 }, filter)};`);
     lines.push('}');
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({ r: 128, g: 128, b: 128 }, filter)};`);
@@ -1036,42 +998,10 @@ function getModifiedUserAgentStyle(filter, isIFrame) {
     lines.push('}');
     ['::selection', '::-moz-selection'].forEach((selection) => {
         lines.push(`${selection} {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({ r: 0, g: 96, b: 212 }, filter)};`);
-    lines.push(`    color: ${modifyForegroundColor({ r: 255, g: 255, b: 255 }, filter)};`);
-    lines.push('}');
-});
-    lines.push('input:-webkit-autofill,');
-    lines.push('textarea:-webkit-autofill,');
-    lines.push('select:-webkit-autofill {');
-    lines.push(`    background-color: ${modifyBackgroundColor({ r: 250, g: 255, b: 189 }, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({ r: 0, g: 0, b: 0 }, filter)} !important;`);
-    lines.push('}');
-    if (!isMacOS()) {
-        lines.push('::-webkit-scrollbar {');
-        lines.push(`    background-color: ${modifyBackgroundColor({ r: 241, g: 241, b: 241 }, filter)};`);
-        lines.push(`    color: ${modifyForegroundColor({ r: 96, g: 96, b: 96 }, filter)};`);
+        lines.push(`    background-color: ${modifyBackgroundColor({ r: 0, g: 96, b: 212 }, filter)};`);
+        lines.push(`    color: ${modifyForegroundColor({ r: 255, g: 255, b: 255 }, filter)};`);
         lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb {');
-        lines.push(`    background-color: ${modifyBackgroundColor({ r: 193, g: 193, b: 193 }, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:hover {');
-        lines.push(`    background-color: ${modifyBackgroundColor({ r: 166, g: 166, b: 166 }, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:active {');
-        lines.push(`    background-color: ${modifyBackgroundColor({ r: 96, g: 96, b: 96 }, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-corner {');
-        lines.push(`    background-color: ${modifyBackgroundColor({ r: 255, g: 255, b: 255 }, filter)};`);
-        lines.push('}');
-    }
-    return lines.join('\n');
-}
-function getModifiedFallbackStyle(filter) {
-    const lines = [];
-    lines.push('html *, body * {');
-    lines.push(`    background-color: ${modifyBackgroundColor({ r: 255, g: 255, b: 255 }, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({ r: 0, g: 0, b: 0 }, filter)} !important;`);
-    lines.push('}');
+    });
     return lines.join('\n');
 }
 const unparsableColors = new Set([
@@ -1079,7 +1009,6 @@ const unparsableColors = new Set([
     'transparent',
     'initial',
     'currentcolor',
-    'none',
 ]);
 const colorParseCache = new Map();
 function parseColorWithCache($color) {
@@ -1132,13 +1061,13 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
             let index = 0;
             return matches.map((match) => {
                 const valueIndex = value.indexOf(match, index);
-            index = valueIndex + match.length;
-            return { match, index: valueIndex };
-        });
+                index = valueIndex + match.length;
+                return { match, index: valueIndex };
+            });
         };
         const matches = getIndices(urls).map((i) => ({ type: 'url', ...i }))
-    .concat(getIndices(gradients).map((i) => ({ type: 'gradient', ...i })))
-    .sort((a, b) => a.index - b.index);
+            .concat(getIndices(gradients).map((i) => ({ type: 'gradient', ...i })))
+            .sort((a, b) => a.index - b.index);
         const getGradientModifier = (gradient) => {
             const match = gradient.match(/^(.*-gradient)\((.*)\)$/);
             const type = match[1];
@@ -1146,16 +1075,16 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
             const partsRegex = /([^\(\),]+(\([^\(\)]*\))?[^\(\),]*),?/g;
             const parts = getMatches(partsRegex, content, 1).map((part) => {
                 let rgb = tryParseColor(part);
-            if (rgb) {
-                return (filter) => modifyGradientColor(rgb, filter);
-            }
-            const space = part.lastIndexOf(' ');
-            rgb = tryParseColor(part.substring(0, space));
-            if (rgb) {
-                return (filter) => `${modifyGradientColor(rgb, filter)} ${part.substring(space + 1)}`;
-            }
-            return () => part;
-        });
+                if (rgb) {
+                    return (filter) => modifyGradientColor(rgb, filter);
+                }
+                const space = part.lastIndexOf(' ');
+                rgb = tryParseColor(part.substring(0, space));
+                if (rgb) {
+                    return (filter) => `${modifyGradientColor(rgb, filter)} ${part.substring(space + 1)}`;
+                }
+                return () => part;
+            });
             return (filter) => {
                 return `${type}(${parts.map((modify) => modify(filter)).join(', ')})`;
             };
@@ -1169,7 +1098,12 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
             else {
                 url = getAbsoluteURL(location.origin, url);
             }
-            const absoluteValue = `url("${url}")`;
+            if (awaitingForImageLoading.has(url)) {
+                return () => new Promise((resolve) => {
+                    awaitingForImageLoading.get(url).push(resolve);
+                });
+            }
+            awaitingForImageLoading.set(url, []);
             return async (filter) => {
                 let imageDetails;
                 if (imageDetailsCache.has(url)) {
@@ -1177,34 +1111,20 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
                 }
                 else {
                     try {
-                        if (awaitingForImageLoading.has(url)) {
-                            const awaiters = awaitingForImageLoading.get(url);
-                            imageDetails = await new Promise((resolve) => awaiters.push(resolve));
-                            if (!imageDetails) {
-                                return null;
-                            }
-                        }
-                        else {
-                            awaitingForImageLoading.set(url, []);
-                            imageDetails = await getImageDetails(url);
-                            imageDetailsCache.set(url, imageDetails);
-                            awaitingForImageLoading.get(url).forEach((resolve) => resolve(imageDetails));
-                            awaitingForImageLoading.delete(url);
-                        }
+                        imageDetails = await getImageDetails(url);
                         if (isCancelled()) {
                             return null;
                         }
                     }
                     catch (err) {
                         logWarn(err);
-                        if (awaitingForImageLoading.has(url)) {
-                            awaitingForImageLoading.get(url).forEach((resolve) => resolve(null));
-                            awaitingForImageLoading.delete(url);
-                        }
-                        return absoluteValue;
+                        awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));
+                        return urlValue;
                     }
+                    imageDetailsCache.set(url, imageDetails);
                 }
-                const bgImageValue = getBgImageValue(imageDetails, filter) || absoluteValue;
+                const bgImageValue = getBgImageValue(imageDetails, filter) || urlValue;
+                awaitingForImageLoading.get(url).forEach((resolve) => resolve(bgImageValue));
                 return bgImageValue;
             };
         };
@@ -1213,7 +1133,7 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
             let result;
             if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
-                const inverted = getFilteredImageDataURL(imageDetails, { ...filter, sepia: clamp(filter.sepia + 10, 0, 100) });
+                const inverted = getFilteredImageDataURL(imageDetails, { ...filter, sepia: clamp(filter.sepia + 90, 0, 100) });
                 result = `url("${inverted}")`;
             }
             else if (isLight && !isTransparent && filter.mode === 1) {
@@ -1221,15 +1141,10 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
                     result = 'none';
                 }
                 else {
-                    logInfo(`Dimming light image ${imageDetails.src}`);
+                    logInfo(`Inverting light image ${imageDetails.src}`);
                     const dimmed = getFilteredImageDataURL(imageDetails, filter);
                     result = `url("${dimmed}")`;
                 }
-            }
-            else if (filter.mode === 0 && isLight && !isLarge) {
-                logInfo(`Applying filter to image ${imageDetails.src}`);
-                const filtered = getFilteredImageDataURL(imageDetails, { ...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100) });
-                result = `url("${filtered}")`;
             }
             else {
                 result = null;
@@ -1240,21 +1155,21 @@ function getBgImageModifier(prop, value, rule, isCancelled) {
         let index = 0;
         matches.forEach(({ match, type, index: matchStart }, i) => {
             const prefixStart = index;
-        const matchEnd = matchStart + match.length;
-        index = matchEnd;
-        modifiers.push(() => value.substring(prefixStart, matchStart));
-        modifiers.push(type === 'url' ? getURLModifier(match) : getGradientModifier(match));
-        if (i === matches.length - 1) {
-            modifiers.push(() => value.substring(matchEnd));
-        }
-    });
+            const matchEnd = matchStart + match.length;
+            index = matchEnd;
+            modifiers.push(() => value.substring(prefixStart, matchStart));
+            modifiers.push(type === 'url' ? getURLModifier(match) : getGradientModifier(match));
+            if (i === matches.length - 1) {
+                modifiers.push(() => value.substring(matchEnd));
+            }
+        });
         return (filter) => {
             const results = modifiers.map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
-                    return asyncResults.join('');
-            });
+                        return asyncResults.join('');
+                    });
             }
             return results.join('');
         };
@@ -1270,15 +1185,15 @@ function getShadowModifier(prop, value) {
         const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
         const modifiers = colorMatches.map((match, i) => {
             const prefixIndex = index;
-        const matchIndex = value.indexOf(match, index);
-        const matchEnd = matchIndex + match.length;
-        index = matchEnd;
-        const rgb = tryParseColor(match);
-        if (!rgb) {
-            return () => value.substring(prefixIndex, matchEnd);
-        }
-        return (filter) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
-    });
+            const matchIndex = value.indexOf(match, index);
+            const matchEnd = matchIndex + match.length;
+            index = matchEnd;
+            const rgb = tryParseColor(match);
+            if (!rgb) {
+                return () => value.substring(prefixIndex, matchEnd);
+            }
+            return (filter) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
+        });
         return (filter) => modifiers.map((modify) => modify(filter)).join('');
     }
     catch (err) {
@@ -1293,229 +1208,44 @@ function cleanModificationCache() {
     awaitingForImageLoading.clear();
 }
 
-const overrides = {
-    'background-color': {
-        customProp: '--darkslack-inline-bgcolor',
-        cssProp: 'background-color',
-        dataAttr: 'data-darkslack-inline-bgcolor',
-        store: new WeakSet(),
-    },
-    'background-image': {
-        customProp: '--darkslack-inline-bgimage',
-        cssProp: 'background-image',
-        dataAttr: 'data-darkslack-inline-bgimage',
-        store: new WeakSet(),
-    },
-    'border-color': {
-        customProp: '--darkslack-inline-border',
-        cssProp: 'border-color',
-        dataAttr: 'data-darkslack-inline-border',
-        store: new WeakSet(),
-    },
-    'border-bottom-color': {
-        customProp: '--darkslack-inline-border-bottom',
-        cssProp: 'border-bottom-color',
-        dataAttr: 'data-darkslack-inline-border-bottom',
-        store: new WeakSet(),
-    },
-    'border-left-color': {
-        customProp: '--darkslack-inline-border-left',
-        cssProp: 'border-left-color',
-        dataAttr: 'data-darkslack-inline-border-left',
-        store: new WeakSet(),
-    },
-    'border-right-color': {
-        customProp: '--darkslack-inline-border-right',
-        cssProp: 'border-right-color',
-        dataAttr: 'data-darkslack-inline-border-right',
-        store: new WeakSet(),
-    },
-    'border-top-color': {
-        customProp: '--darkslack-inline-border-top',
-        cssProp: 'border-top-color',
-        dataAttr: 'data-darkslack-inline-border-top',
-        store: new WeakSet(),
-    },
-    'box-shadow': {
-        customProp: '--darkslack-inline-boxshadow',
-        cssProp: 'box-shadow',
-        dataAttr: 'data-darkslack-inline-boxshadow',
-        store: new WeakSet(),
-    },
-    'color': {
-        customProp: '--darkslack-inline-color',
-        cssProp: 'color',
-        dataAttr: 'data-darkslack-inline-color',
-        store: new WeakSet(),
-    },
-    'fill': {
-        customProp: '--darkslack-inline-fill',
-        cssProp: 'fill',
-        dataAttr: 'data-darkslack-inline-fill',
-        store: new WeakSet(),
-    },
-    'stroke': {
-        customProp: '--darkslack-inline-stroke',
-        cssProp: 'stroke',
-        dataAttr: 'data-darkslack-inline-stroke',
-        store: new WeakSet(),
-    },
-    'outline-color': {
-        customProp: '--darkslack-inline-outline',
-        cssProp: 'outline-color',
-        dataAttr: 'data-darkslack-inline-outline',
-        store: new WeakSet(),
-    },
-};
-const overridesList = Object.values(overrides);
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stroke', 'bgcolor', 'color'];
-const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
-function getInlineOverrideStyle() {
-    return overridesList.map(({ dataAttr, customProp, cssProp }) => {
-        return [
-            `[${dataAttr}] {`,
-            `  ${cssProp}: var(${customProp}) !important;`,
-            '}',
-        ].join('\n');
-}).join('\n');
-}
-let observer = null;
-function overrideInlineStyles(filter) {
-    const elements = Array.from(document.querySelectorAll(INLINE_STYLE_SELECTOR));
-    elements.forEach((el) => elementDidUpdate(el, filter));
-}
-function expand(nodes, selector) {
-    const results = [];
-    nodes.forEach((n) => {
-        if (n instanceof Element) {
-        if (n.matches(selector)) {
-            results.push(n);
+function getInlineStyleOverride(elements, filter) {
+    const styles = [];
+    let prefix = Math.round(Date.now() * Math.random()).toString(16);
+    let counter = 0;
+    elements.forEach((el) => {
+        const modDecs = [];
+        el.style && iterateCSSDeclarations(el.style, (property, value) => {
+            // Temporaty ignore background images
+            // due to possible performance issues
+            // and complexity of handling async requests
+            if (property === 'background-image') {
+                return;
+            }
+            const mod = getModifiableCSSDeclaration(property, value, null, null);
+            if (mod) {
+                modDecs.push(mod);
+            }
+        });
+        if (modDecs.length > 0) {
+            const id = `${prefix}-${++counter}`;
+            el.dataset.darkslackInlineId = id;
+            const selector = `[data-darkslack-inline-id="${id}"]`;
+            const lines = [];
+            lines.push(`${selector} {`);
+            modDecs.forEach(({ property, value }) => {
+                const val = typeof value === 'function' ? value(filter) : value;
+                if (val) {
+                    lines.push(`    ${property}: ${val} !important;`);
+                }
+            });
+            lines.push('}');
+            styles.push(lines.join('\n'));
         }
-        results.push(...Array.from(n.querySelectorAll(selector)));
-    }
-});
-    return results;
-}
-function watchForInlineStyles(filter) {
-    if (observer) {
-        observer.disconnect();
-    }
-    observer = new MutationObserver((mutations) => {
-        mutations.forEach((m) => {
-        const createdInlineStyles = expand(Array.from(m.addedNodes), INLINE_STYLE_SELECTOR);
-    if (createdInlineStyles.length > 0) {
-        createdInlineStyles.forEach((el) => elementDidUpdate(el, filter));
-    }
-    if (m.type === 'attributes') {
-        if (INLINE_STYLE_ATTRS.indexOf(m.attributeName) >= 0) {
-            elementDidUpdate(m.target, filter);
-        }
-        overridesList
-            .filter(({ store, dataAttr }) => store.has(m.target) && !m.target.hasAttribute(dataAttr))
-    .forEach(({ dataAttr }) => m.target.setAttribute(dataAttr, ''));
-    }
-});
-});
-    observer.observe(document, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: INLINE_STYLE_ATTRS.concat(overridesList.map(({ dataAttr }) => dataAttr)),
-});
-}
-const elementsChangeKeys = new WeakMap();
-const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
-function getElementChangeKey(el, filter) {
-    return INLINE_STYLE_ATTRS
-        .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-.concat(filterProps.map((prop) => `${prop}="${filter[prop]}"`))
-.join(' ');
-}
-function stopWatchingForInlineStyles() {
-    if (observer) {
-        observer.disconnect();
-        observer = null;
-    }
-}
-function elementDidUpdate(element, filter) {
-    if (elementsChangeKeys.get(element) === getElementChangeKey(element, filter)) {
-        return;
-    }
-    overrideInlineStyle(element, filter);
-}
-function overrideInlineStyle(element, filter) {
-    const unsetProps = new Set(Object.keys(overrides));
-    function setCustomProp(targetCSSProp, modifierCSSProp, cssVal) {
-        const { customProp, dataAttr, store } = overrides[targetCSSProp];
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, null);
-        if (!mod) {
-            return;
-        }
-        let value = mod.value;
-        if (typeof value === 'function') {
-            value = value(filter);
-        }
-        element.style.setProperty(customProp, value);
-        if (!element.hasAttribute(dataAttr)) {
-            element.setAttribute(dataAttr, '');
-        }
-        unsetProps.delete(targetCSSProp);
-    }
-    if (element.hasAttribute('bgcolor')) {
-        let value = element.getAttribute('bgcolor');
-        if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
-            value = `#${value}`;
-        }
-        setCustomProp('background-color', 'background-color', value);
-    }
-    if (element.hasAttribute('color')) {
-        let value = element.getAttribute('color');
-        if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
-            value = `#${value}`;
-        }
-        setCustomProp('color', 'color', value);
-    }
-    if (element.hasAttribute('fill') && element instanceof SVGElement) {
-        const SMALL_SVG_LIMIT = 32;
-        let value = element.getAttribute('fill');
-        let isBg = false;
-        if (!(element instanceof SVGTextElement)) {
-            const { width, height } = element.getBoundingClientRect();
-            isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
-        }
-        setCustomProp('fill', isBg ? 'background-color' : 'color', value);
-    }
-    if (element.hasAttribute('stroke')) {
-        let value = element.getAttribute('stroke');
-        setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
-    }
-    element.style && iterateCSSDeclarations(element.style, (property, value) => {
-        if (property === 'background-image' && value.indexOf('url') >= 0) {
-        return;
-    }
-    if (overrides.hasOwnProperty(property)) {
-        setCustomProp(property, property, value);
-    }
-});
-    if (element.style && element instanceof SVGTextElement && element.style.fill) {
-        setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
-    }
-    Array.from(unsetProps).forEach((cssProp) => {
-        const { store, dataAttr } = overrides[cssProp];
-    store.delete(element);
-    element.removeAttribute(dataAttr);
-});
-    elementsChangeKeys.set(element, getElementChangeKey(element, filter));
+    });
+    return styles.join('\n');
 }
 
-const STYLE_SELECTOR = 'link[rel="stylesheet" i], style';
-function shouldManageStyle(element) {
-    return (((element instanceof HTMLStyleElement) ||
-        (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')) && (!element.classList.contains('darkslack') ||
-        element.classList.contains('darkslack--cors')) &&
-        element.media !== 'print');
-}
-async function manageStyle(element, { update, loadingStart, loadingEnd }) {
+async function manageStyle(element, { update }) {
     const prevStyles = [];
     let next = element;
     while ((next = next.nextElementSibling) && next.matches('.darkslack')) {
@@ -1530,8 +1260,8 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
     }
     const observer = new MutationObserver(async (mutations) => {
         rules = await getRules();
-    update();
-});
+        update();
+    });
     const observerOptions = { attributes: true, childList: true };
     let rules;
     async function getRules() {
@@ -1551,6 +1281,8 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
             rules = element.sheet.cssRules;
         }
         catch (err) {
+            // Sometimes cross-origin stylesheets are protected from direct access
+            // so need to load CSS text and insert it into style element
             const link = element;
             if (corsCopy) {
                 corsCopy.disabled = false;
@@ -1558,14 +1290,7 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
                 corsCopy.disabled = true;
             }
             else {
-                loadingStart();
-                try {
-                    corsCopy = await createCORSCopy(link, isCancelled);
-                }
-                catch (err) {
-                    logWarn(err);
-                }
-                loadingEnd();
+                corsCopy = await createCORSCopy(link, isCancelled);
                 if (corsCopy) {
                     corsCopy.disabled = false;
                     rules = corsCopy.sheet.cssRules;
@@ -1579,11 +1304,11 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
         const variables = new Map();
         rules && iterateCSSRules(rules, (rule) => {
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-            if (property.startsWith('--')) {
-            variables.set(property, value);
-        }
-    });
-    });
+                if (property.startsWith('--')) {
+                    variables.set(property, value);
+                }
+            });
+        });
         return variables;
     }
     function details() {
@@ -1597,9 +1322,12 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
     const rulesModCache = new Map();
     let prevFilterKey = null;
     async function render(filter, variables) {
-        rules = await getRules();
         if (!rules) {
-            return null;
+            // Observer fails to trigger change?
+            rules = await getRules();
+            if (!rules) {
+                return null;
+            }
         }
         cancelAsyncOperations = false;
         let rulesChanged = (rulesModCache.size === 0);
@@ -1609,58 +1337,60 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
         const modRules = [];
         iterateCSSRules(rules, (rule) => {
             let cssText = rule.cssText;
-        let textDiffersFromPrev = false;
-        notFoundCacheKeys.delete(cssText);
-        if (!rulesTextCache.has(cssText)) {
-            rulesTextCache.set(cssText, cssText);
-            textDiffersFromPrev = true;
-        }
-        let vars = null;
-        let varsRule = null;
-        if (variables.size > 0) {
-            const cssTextWithVariables = replaceCSSVariables(cssText, variables);
-            if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
-                rulesTextCache.set(cssText, cssTextWithVariables);
+            let textDiffersFromPrev = false;
+            notFoundCacheKeys.delete(cssText);
+            if (!rulesTextCache.has(cssText)) {
+                rulesTextCache.set(cssText, cssText);
                 textDiffersFromPrev = true;
-                vars = document.createElement('style');
-                vars.classList.add('darkslack');
-                vars.classList.add('darkslack--vars');
-                vars.media = 'screen';
-                vars.textContent = cssTextWithVariables;
-                element.parentElement.insertBefore(vars, element.nextSibling);
-                varsRule = vars.sheet.cssRules[0];
             }
-        }
-        if (textDiffersFromPrev) {
-            rulesChanged = true;
-        }
-        else {
-            modRules.push(rulesModCache.get(cssText));
-            return;
-        }
-        const modDecs = [];
-        const targetRule = varsRule || rule;
-        targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-            const mod = getModifiableCSSDeclaration(property, value, rule, isCancelled);
-        if (mod) {
-            modDecs.push(mod);
-        }
-    });
-        let modRule = null;
-        if (modDecs.length > 0) {
-            modRule = { selector: rule.selectorText, declarations: modDecs };
-            if (rule.parentRule instanceof CSSMediaRule) {
-                modRule.media = rule.parentRule.media.mediaText;
+            // Put CSS text with inserted CSS variables into separate <style> element
+            // to properly handle composite properties (e.g. background -> background-color)
+            let vars = null;
+            let varsRule = null;
+            if (variables.size > 0) {
+                const cssTextWithVariables = replaceCSSVariables(cssText, variables);
+                if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
+                    rulesTextCache.set(cssText, cssTextWithVariables);
+                    textDiffersFromPrev = true;
+                    vars = document.createElement('style');
+                    vars.classList.add('darkslack');
+                    vars.classList.add('darkslack--vars');
+                    vars.media = 'screen';
+                    vars.textContent = cssTextWithVariables;
+                    element.parentElement.insertBefore(vars, element.nextSibling);
+                    varsRule = vars.sheet.cssRules[0];
+                }
             }
-            modRules.push(modRule);
-        }
-        rulesModCache.set(cssText, modRule);
-        removeNode(vars);
-    });
+            if (textDiffersFromPrev) {
+                rulesChanged = true;
+            }
+            else {
+                modRules.push(rulesModCache.get(cssText));
+                return;
+            }
+            const modDecs = [];
+            const targetRule = varsRule || rule;
+            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
+                const mod = getModifiableCSSDeclaration(property, value, rule, isCancelled);
+                if (mod) {
+                    modDecs.push(mod);
+                }
+            });
+            let modRule = null;
+            if (modDecs.length > 0) {
+                modRule = { selector: rule.selectorText, declarations: modDecs };
+                if (rule.parentRule instanceof CSSMediaRule) {
+                    modRule.media = rule.parentRule.media.mediaText;
+                }
+                modRules.push(modRule);
+            }
+            rulesModCache.set(cssText, modRule);
+            removeNode(vars);
+        });
         notFoundCacheKeys.forEach((key) => {
             rulesTextCache.delete(key);
-        rulesModCache.delete(key);
-    });
+            rulesModCache.delete(key);
+        });
         prevFilterKey = filterKey;
         if (!rulesChanged && !filterChanged) {
             return;
@@ -1668,32 +1398,73 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
         asyncStyles.forEach(removeNode);
         asyncStyles.splice(0);
         const queue = [];
+        let frameId = null;
+        function addToQueue(d) {
+            queue.push(d);
+            if (!frameId) {
+                frameId = requestAnimationFrame(() => {
+                    frameId = null;
+                    if (cancelAsyncOperations) {
+                        return;
+                    }
+                    const mediaGroups = queue.reduce((groups, d) => {
+                        const media = d.media || '';
+                        if (!groups[media]) {
+                            groups[media] = [];
+                        }
+                        groups[media].push(d);
+                        return groups;
+                    }, {});
+                    const asyncStyle = document.createElement('style');
+                    asyncStyle.classList.add('darkslack');
+                    asyncStyle.classList.add('darkslack--async');
+                    asyncStyle.media = 'screen';
+                    asyncStyle.textContent = Object.entries(mediaGroups).map(([media, decs]) => [
+                        media && `@media ${media} {`,
+                        decs.map(({ selector, property, value, importantKeyword }) => [
+                            `${selector} {`,
+                            `    ${property}: ${value}${importantKeyword};`,
+                            '}',
+                        ].join('\n')).join('\n'),
+                        media && '}',
+                    ].filter((ln) => ln)).join('\n');
+                    const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
+                    element.parentElement.insertBefore(asyncStyle, insertTarget);
+                    asyncStyles.push(asyncStyle);
+                });
+            }
+        }
         const lines = [];
         modRules.filter((r) => r).forEach(({ selector, declarations, media }) => {
             if (media) {
                 lines.push(`@media ${media} {`);
             }
             lines.push(`${selector} {`);
-        declarations.forEach(({ property, value, important }) => {
-            const importantKeyword = important ? ' !important' : '';
-        if (typeof value === 'function') {
-            const modified = value(filter);
-            if (modified instanceof Promise) {
-                queue.push({ media, selector, property, importantKeyword, promise: modified });
-            }
-            else {
-                lines.push(`    ${property}: ${modified}${importantKeyword};`);
-            }
-        }
-        else {
-            lines.push(`    ${property}: ${value}${importantKeyword};`);
-        }
-    });
-        lines.push('}');
-        if (media) {
+            declarations.forEach(({ property, value, important }) => {
+                const importantKeyword = important ? ' !important' : '';
+                if (typeof value === 'function') {
+                    const modified = value(filter);
+                    if (modified instanceof Promise) {
+                        modified.then((asyncValue) => {
+                            if (cancelAsyncOperations || !asyncValue) {
+                                return;
+                            }
+                            addToQueue({ media, selector, property, value: asyncValue, importantKeyword });
+                        });
+                    }
+                    else {
+                        lines.push(`    ${property}: ${modified}${importantKeyword};`);
+                    }
+                }
+                else {
+                    lines.push(`    ${property}: ${value}${importantKeyword};`);
+                }
+            });
             lines.push('}');
-        }
-    });
+            if (media) {
+                lines.push('}');
+            }
+        });
         if (!syncStyle) {
             syncStyle = document.createElement('style');
             syncStyle.classList.add('darkslack');
@@ -1702,69 +1473,11 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
         }
         element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
         syncStyle.textContent = lines.join('\n');
-        queue.forEach(({ promise }) => promise.catch((err) => {
-            logWarn(err);
-        return null;
-    }));
-        queue.length > 0 && Promise.all(queue.map(({ promise }) => promise))
-    .then((values) => {
-            if (cancelAsyncOperations || values.filter((v) => v).length === 0) {
-            return;
-        }
-        const asyncStyle = document.createElement('style');
-        asyncStyle.classList.add('darkslack');
-        asyncStyle.classList.add('darkslack--async');
-        asyncStyle.media = 'screen';
-        asyncStyle.textContent = queue.map(({ selector, property, media, importantKeyword }, i) => {
-            const value = values[i];
-        if (!value) {
-            return null;
-        }
-        return [
-            media && `@media ${media} {`,
-            `${selector} {`,
-            `    ${property}: ${value}${importantKeyword};`,
-            '}',
-            media && '}',
-        ].filter((ln) => ln).join('\n');
-    }).filter((ln) => ln).join('\n');
-        const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
-        element.parentElement.insertBefore(asyncStyle, insertTarget);
-        asyncStyles.push(asyncStyle);
-    });
         observer.observe(element, observerOptions);
-        if (element instanceof HTMLStyleElement && element.hasAttribute('data-styled-components')) {
-            if (element.sheet && element.sheet.cssRules) {
-                styledComponentsRulesCount = element.sheet.cssRules.length;
-            }
-            cancelAnimationFrame(styledComponentsCheckFrameId);
-            styledComponentsChecksCount = 0;
-            const checkForUpdate = async () => {
-                if (element.sheet && element.sheet.cssRules &&
-                    element.sheet.cssRules.length !== styledComponentsRulesCount) {
-                    logWarn('CSS Rules count changed', element);
-                    cancelAnimationFrame(styledComponentsCheckFrameId);
-                    rules = await getRules();
-                    update();
-                    return;
-                }
-                styledComponentsChecksCount++;
-                if (styledComponentsChecksCount === 1000) {
-                    cancelAnimationFrame(styledComponentsCheckFrameId);
-                    return;
-                }
-                styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
-            };
-            checkForUpdate();
-        }
     }
-    let styledComponentsRulesCount = null;
-    let styledComponentsChecksCount = null;
-    let styledComponentsCheckFrameId = null;
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
-        cancelAnimationFrame(styledComponentsCheckFrameId);
     }
     function destroy() {
         pause();
@@ -1784,30 +1497,29 @@ async function manageStyle(element, { update, loadingStart, loadingEnd }) {
 function linkLoading(link) {
     return new Promise((resolve, reject) => {
         const cleanUp = () => {
-        link.removeEventListener('load', onLoad);
-    link.removeEventListener('error', onError);
-};
-    const onLoad = () => {
-        cleanUp();
-        resolve();
-    };
-    const onError = () => {
-        cleanUp();
-        reject(`Link loading failed ${link.href}`);
-    };
-    link.addEventListener('load', onLoad);
-    link.addEventListener('error', onError);
-});
+            link.removeEventListener('load', onLoad);
+            link.removeEventListener('error', onError);
+        };
+        const onLoad = () => {
+            cleanUp();
+            resolve();
+        };
+        const onError = () => {
+            cleanUp();
+            reject(`Link loading failed ${link.href}`);
+        };
+        link.addEventListener('load', onLoad);
+        link.addEventListener('error', onError);
+    });
 }
-async function loadCSSText(url) {
+async function createCORSCopy(link, isCancelled) {
+    const url = link.href;
+    const prevCors = Array.from(link.parentElement.querySelectorAll('.darkslack--cors')).find((el) => el.dataset.uri === url);
+    if (prevCors) {
+        return prevCors;
+    }
     let response;
-    let cache;
-    try {
-        cache = sessionStorage.getItem(`darkslack-cache:${url}`);
-    }
-    catch (err) {
-        logWarn(err);
-    }
+    const cache = sessionStorage.getItem(`darkslack-cache:${url}`);
     if (cache) {
         response = cache;
     }
@@ -1825,22 +1537,7 @@ async function loadCSSText(url) {
     let cssText = response;
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, url);
-    const importMatches = getMatches(cssImportRegex, cssText);
-    for (let match of importMatches) {
-        const importURL = getCSSURLValue(match.substring(8).replace(/;$/, ''));
-        const importedCSS = await loadCSSText(importURL);
-        cssText = cssText.split(match).join(importedCSS);
-    }
     cssText = cssText.trim();
-    return cssText;
-}
-async function createCORSCopy(link, isCancelled) {
-    const url = link.href;
-    const prevCors = Array.from(link.parentElement.querySelectorAll('.darkslack--cors')).find((el) => el.dataset.uri === url);
-    if (prevCors) {
-        return prevCors;
-    }
-    const cssText = await loadCSSText(url);
     if (!cssText) {
         return null;
     }
@@ -1854,82 +1551,10 @@ async function createCORSCopy(link, isCancelled) {
     return cors;
 }
 
-let observer$1 = null;
-function getAllManageableStyles(nodes) {
-    const results = [];
-    Array.from(nodes).forEach((node) => {
-        if (node instanceof Element) {
-        if (shouldManageStyle(node)) {
-            results.push(node);
-        }
-        results.push(...Array.from(node.querySelectorAll(STYLE_SELECTOR)).filter(shouldManageStyle));
-    }
-});
-    return results;
-}
-function watchForStyleChanges(update) {
-    if (observer$1) {
-        observer$1.disconnect();
-    }
-    observer$1 = new MutationObserver((mutations) => {
-        const createdStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.addedNodes)), []);
-    const removedStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.removedNodes)), []);
-    const updatedStyles = mutations
-        .filter(({ target, type }) => type === 'attributes' && shouldManageStyle(target))
-.reduce((styles, { target }) => {
-        styles.push(target);
-    return styles;
-}, []);
-    if (createdStyles.length + removedStyles.length + updatedStyles.length > 0) {
-        update({
-            created: createdStyles,
-            updated: updatedStyles,
-            removed: removedStyles,
-        });
-    }
-});
-    observer$1.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['rel'] });
-}
-function stopWatchingForStyleChanges() {
-    if (observer$1) {
-        observer$1.disconnect();
-        observer$1 = null;
-    }
-}
-
-function throttle(callback) {
-    let pending = false;
-    let frameId = null;
-    let lastArgs;
-    const throttled = ((...args) => {
-        lastArgs = args;
-        if (frameId) {
-            pending = true;
-        }
-        else {
-            callback(...lastArgs);
-            frameId = requestAnimationFrame(() => {
-                frameId = null;
-            if (pending) {
-                callback(...lastArgs);
-                pending = false;
-            }
-        });
-        }
-    });
-    const cancel = () => {
-        cancelAnimationFrame(frameId);
-        pending = false;
-        frameId = null;
-    };
-    return Object.assign(throttled, { cancel });
-}
-
 const styleManagers = new Map();
 const variables = new Map();
 let filter = null;
 let fixes = null;
-let isIFrame = null;
 function createOrUpdateStyle$1(className) {
     let style = document.head.querySelector(`.${className}`);
     if (!style) {
@@ -1943,11 +1568,9 @@ function createOrUpdateStyle$1(className) {
 function createTheme() {
     const userAgentStyle = createOrUpdateStyle$1('darkslack--user-agent');
     document.head.insertBefore(userAgentStyle, document.head.firstChild);
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
-    const fallbackStyle = createOrUpdateStyle$1('darkslack--fallback');
-    document.head.insertBefore(fallbackStyle, userAgentStyle.nextSibling);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter);
     const textStyle = createOrUpdateStyle$1('darkslack--text');
-    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
+    document.head.insertBefore(textStyle, userAgentStyle.nextSibling);
     if (filter.useFont || filter.textStroke > 0) {
         textStyle.textContent = createTextStyle(filter);
     }
@@ -1959,10 +1582,7 @@ function createTheme() {
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
-            `    filter: ${getCSSFilterValue({
-                    ...filter,
-                contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
-                })} !important;`,
+            `    filter: ${getCSSFilterValue(filter)} !important;`,
             '}',
         ].join('\n');
     }
@@ -1971,44 +1591,30 @@ function createTheme() {
     }
     const inlineStyle = createOrUpdateStyle$1('darkslack--inline');
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
-    inlineStyle.textContent = getInlineOverrideStyle();
-    Array.from(document.querySelectorAll(STYLE_SELECTOR))
+    if (fixes && Array.isArray(fixes.inline) && fixes.inline.length > 0) {
+        const elements = Array.from(document.querySelectorAll(fixes.inline.join(', ')));
+        inlineStyle.textContent = getInlineStyleOverride(elements, filter);
+    }
+    else {
+        inlineStyle.textContent = '';
+    }
+    Array.from(document.querySelectorAll('link[rel="stylesheet" i], style'))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
-.forEach((style) => createManager(style));
+        .forEach((style) => createManager(style));
     throttledRender();
-    overrideInlineStyles(filter);
 }
 const pendingCreation = new Set();
-let loadingStylesCounter = 0;
-let loadingStyles = new Set();
 async function createManager(element) {
     if (styleManagers.has(element) || pendingCreation.has(element)) {
         return;
     }
     pendingCreation.add(element);
-    let manager = null;
     function update() {
-        if (!manager) {
-            return;
-        }
         const details = manager.details();
         updateVariables(details.variables);
         throttledRender();
     }
-    let loadingStyleId = ++loadingStylesCounter;
-    function loadingStart() {
-        if (!isPageLoaded) {
-            document.head.querySelector('.darkslack--fallback').textContent = getModifiedFallbackStyle(filter);
-            loadingStyles.add(loadingStyleId);
-        }
-    }
-    function loadingEnd() {
-        loadingStyles.delete(loadingStyleId);
-        if (loadingStyles.size === 0 && isPageLoaded) {
-            document.head.querySelector('.darkslack--fallback').textContent = '';
-        }
-    }
-    manager = await manageStyle(element, { update, loadingStart, loadingEnd });
+    const manager = await manageStyle(element, { update });
     if (!pendingCreation.has(element)) {
         manager.destroy();
         return;
@@ -2027,51 +1633,71 @@ function removeManager(element) {
         styleManagers.delete(element);
     }
 }
-const throttledRender = throttle(function render() {
+let pendingRendering = false;
+let requestedFrameId = null;
+function render() {
     styleManagers.forEach((manager) => manager.render(filter, variables));
-});
-let isPageLoaded = document.readyState === 'complete';
-function onPageLoad() {
-    isPageLoaded = true;
-    if (loadingStyles.size === 0) {
-        document.head.querySelector('.darkslack--fallback').textContent = '';
-    }
-    throttledRender();
 }
+function throttledRender() {
+    if (requestedFrameId) {
+        pendingRendering = true;
+    }
+    else {
+        render();
+        requestedFrameId = requestAnimationFrame(() => {
+            requestedFrameId = null;
+            if (pendingRendering) {
+                render();
+                pendingRendering = false;
+            }
+        });
+    }
+}
+function shouldManageStyle(element) {
+    return (((element instanceof HTMLStyleElement) ||
+        (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')) && (!element.classList.contains('darkslack') ||
+            element.classList.contains('darkslack--cors')) &&
+        element.media !== 'print');
+}
+let styleChangeObserver = null;
 function createThemeAndWatchForUpdates() {
     createTheme();
-    watchForStyleChanges(({ created, updated, removed }) => {
-        Array.from(new Set(created.concat(updated)))
-        .filter((style) => !styleManagers.has(style))
-.forEach((style) => createManager(style));
-    removed.forEach((style) => removeManager(style));
-    throttledRender();
-});
-    watchForInlineStyles(filter);
-    document.addEventListener('DOMContentLoaded', onPageLoad);
+    styleChangeObserver = new MutationObserver((mutations) => {
+        const addedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes).filter(shouldManageStyle)), []);
+        addedStyles.forEach((el) => createManager(el));
+        const removedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.removedNodes).filter(shouldManageStyle)), []);
+        removedStyles.forEach((el) => removeManager(el));
+        if ((addedStyles.length + removedStyles.length > 0) ||
+            mutations.some((m) => m.target && shouldManageStyle(m.target))) {
+            throttledRender();
+        }
+    });
+    styleChangeObserver.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    document.addEventListener('load', throttledRender);
     window.addEventListener('load', throttledRender);
 }
 function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
-    stopWatchingForStyleChanges();
-    stopWatchingForInlineStyles();
-    document.removeEventListener('DOMContentLoaded', onPageLoad);
+    if (styleChangeObserver) {
+        styleChangeObserver.disconnect();
+        styleChangeObserver = null;
+    }
+    document.removeEventListener('load', throttledRender);
     window.removeEventListener('load', throttledRender);
 }
-function createOrUpdateDynamicTheme(filterConfig, dynamicThemeFixes, iframe) {
+function createOrUpdateDynamicTheme(filterConfig, dynamicThemeFixes) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
-    isIFrame = iframe;
     if (document.head) {
         createThemeAndWatchForUpdates();
     }
     else {
         const headObserver = new MutationObserver(() => {
             if (document.head) {
-            headObserver.disconnect();
-            createThemeAndWatchForUpdates();
-        }
-    });
+                headObserver.disconnect();
+                createThemeAndWatchForUpdates();
+            }
+        });
         headObserver.observe(document, { childList: true, subtree: true });
     }
 }
@@ -2079,7 +1705,6 @@ function removeDynamicTheme() {
     cleanDynamicThemeCache();
     if (document.head) {
         removeNode(document.head.querySelector('.darkslack--user-agent'));
-        removeNode(document.head.querySelector('.darkslack--fallback'));
         removeNode(document.head.querySelector('.darkslack--text'));
         removeNode(document.head.querySelector('.darkslack--invert'));
         removeNode(document.head.querySelector('.darkslack--inline'));
@@ -2088,7 +1713,9 @@ function removeDynamicTheme() {
     Array.from(document.querySelectorAll('.darkslack')).forEach(removeNode);
 }
 function cleanDynamicThemeCache() {
-    throttledRender.cancel();
+    cancelAnimationFrame(requestedFrameId);
+    pendingRendering = false;
+    requestedFrameId = null;
     pendingCreation.clear();
     stopWatchingForUpdates();
     cleanModificationCache();
